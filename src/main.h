@@ -40,5 +40,5 @@ struct image *parse_image(FILE *image,uint32_t width, uint32_t height);
 enum Error read_header(FILE *image, struct bmp_header *header);
 struct image *rotate_image(struct image *image);
 struct bmp_header rotate_header(struct bmp_header header);
-void load_image(struct image *img, struct bmp_header *header, FILE *image);
+void load_image(struct image * const img, struct bmp_header * const header, FILE * const image);
 #endif

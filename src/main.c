@@ -5,8 +5,8 @@
 
 #define MAGIC 0x4d42
 
-int main(void){
-	FILE *image = fopen("./res/anime.bmp", "rb");
+int main(int argc, char * argv[]){
+	FILE *image = fopen("./res/3_3.bmp"/*"./res/anime.bmp"*/, "rb");
 	struct bmp_header *header = malloc(sizeof(struct bmp_header));
 	if (read_header(image, header) != OK){
 		exit(1);
@@ -20,7 +20,7 @@ int main(void){
 	struct image *rotated = rotate_image(origin);
 	struct bmp_header rotated_header = rotate_header(*header);
 
-	FILE *new_img = fopen("./res/newanime.bmp", "wb");
+	FILE *new_img = fopen("./res/newanimee.bmp", "wb");
 
 	load_image(rotated, &rotated_header, new_img);
 	fclose(new_img);
@@ -28,7 +28,7 @@ int main(void){
 	return 0;
 }
 
-void load_image(struct image *img, struct bmp_header *header, FILE *image){
+void load_image(struct image * const img, struct bmp_header * const header, FILE * const image){
 	fwrite(header, sizeof(struct bmp_header), 1, image);
 	fwrite(img->pixels, sizeof(struct pixel), img->height*img->width, image);
 }
