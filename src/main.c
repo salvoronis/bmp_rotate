@@ -78,8 +78,8 @@ struct image *parse_image(FILE *image,uint32_t width, uint32_t height){
 	img->height = height;
 	img->width = width;
 	img->pixels = (struct pixel*)malloc(img->width*sizeof(struct pixel)*img->height);
-	uint32_t padding = (4 - (img->width * sizeof(struct pixel)) % 4) % 4;
-	for (uint8_t count = 0; count < img->height; count++) {
+	uint8_t padding = (4 - (img->width * sizeof(struct pixel)) % 4) % 4;
+	for (uint32_t count = 0; count < img->height; count++) {
 		fread(img->pixels+(count*img->width), sizeof(struct pixel), img->width, image);
 		fseek(image, padding, SEEK_CUR);
 	}
