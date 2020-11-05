@@ -6,7 +6,7 @@
 #define MAGIC 0x4d42
 
 int main(int argc, char * argv[]){
-	FILE *image = fopen("./res/3_3.bmp"/*"./res/anime.bmp"*/, "rb");
+	FILE *image = fopen(argv[1], "rb");
 	struct bmp_header *header = malloc(sizeof(struct bmp_header));
 	if (read_header(image, header) != OK){
 		exit(1);
@@ -20,7 +20,7 @@ int main(int argc, char * argv[]){
 	struct image *rotated = rotate_image(origin);
 	struct bmp_header rotated_header = rotate_header(*header);
 
-	FILE *new_img = fopen("./res/newanimee.bmp", "wb");
+	FILE *new_img = fopen("./res/result.bmp", "wb");
 
 	load_image(rotated, &rotated_header, new_img);
 	fclose(new_img);
@@ -30,7 +30,11 @@ int main(int argc, char * argv[]){
 
 void load_image(struct image * const img, struct bmp_header * const header, FILE * const image){
 	fwrite(header, sizeof(struct bmp_header), 1, image);
-	fwrite(img->pixels, sizeof(struct pixel), img->height*img->width, image);
+	uint8_t padding = (4 - (img->width * sizeof(struct pixel)) % 4) % 4;
+	for (uint32_t count = 0; count < img->height; count++) {
+		fwrite(img->pixels+(count*img->width), sizeof(struct pixel), img->width, image);
+		fwrite(&padding, 1, padding, image);
+	}
 }
 
 enum Error read_header(FILE *image, struct bmp_header *header){
@@ -74,7 +78,10 @@ struct image *parse_image(FILE *image,uint32_t width, uint32_t height){
 	img->height = height;
 	img->width = width;
 	img->pixels = (struct pixel*)malloc(img->width*sizeof(struct pixel)*img->height);
-
-	fread(img->pixels, sizeof(struct pixel), img->height*img->width, image);
+	uint32_t padding = (4 - (img->width * sizeof(struct pixel)) % 4) % 4;
+	for (uint8_t count = 0; count < img->height; count++) {
+		fread(img->pixels+(count*img->width), sizeof(struct pixel), img->width, image);
+		fseek(image, padding, SEEK_CUR);
+	}
 	return img;
 }
