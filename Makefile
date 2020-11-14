@@ -1,7 +1,24 @@
 CC = gcc
 OUTPUT = build/main
-SRC = src/main.c src/bmp.c
+SRC = src/
+OBJ = obj/
 LIBS = -lm
+LFOLD= -L./lib/
 
-all: src/main.c
-	$(CC) -o $(OUTPUT) $(SRC) $(LIBS)
+all: main.o bmp.o librotation.so
+	$(CC) -o $(OUTPUT) $(OBJ)main.o $(OBJ)bmp.o $(LFOLD) $(LIBS) -lrotation -Wl,-rpath,./lib
+
+main.o: src/main.c
+	$(CC) -o $(OBJ)main.o -c $(SRC)main.c
+
+bmp.o: src/bmp.c
+	$(CC) -o $(OBJ)bmp.o -c $(SRC)bmp.c
+
+librotation.so: rotation.o
+	$(CC) -shared -o lib/librotation.so obj/rotation.o
+
+rotation.o: src/rotation.c
+	$(CC) -o $(OBJ)rotation.o -c $(SRC)rotation.c $(LIBS)
+
+clean:
+	rm obj/* build/*

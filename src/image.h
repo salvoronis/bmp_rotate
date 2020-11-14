@@ -18,6 +18,4 @@ enum Error{
 };
 struct image rotate_image(struct image image);
 struct image creat_image(uint32_t width, uint32_t height);
-struct image calculate_HeWi_angle(struct image *origin, double angle);
-struct image rotate_angle(struct image * img, double angle);
 #endif

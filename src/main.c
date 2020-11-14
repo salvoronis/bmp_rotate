@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "bmp.h"
+#include "rotation.h"
 
 int main(int argc, char * argv[]){
 	FILE *image = fopen(argv[1], "rb");
@@ -16,9 +17,7 @@ int main(int argc, char * argv[]){
 	fclose(image);
 	
 
-	double angle_r = 20.0*PI/180;
-	//struct image test = calculate_HeWi_angle(&origin, angle_r);
-	//printf("--> %u %u\n",test.height,test.width);
+	double angle_r = 10.0*PI/180;
 	struct image test = rotate_angle(&origin, angle_r);
 	struct bmp_header angle_header = rotate_header(header, &test);
 	FILE *shit = fopen("./res/angle.bmp", "wb");
