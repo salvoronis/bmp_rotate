@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "bmp.h"
 
 int main(int argc, char * argv[]){
@@ -13,9 +14,18 @@ int main(int argc, char * argv[]){
 
 	struct image origin = parse_image(image, header->biWidth, header->biHeight);
 	fclose(image);
+	
+
+	double angle_r = 20.0*PI/180;
+	//struct image test = calculate_HeWi_angle(&origin, angle_r);
+	//printf("--> %u %u\n",test.height,test.width);
+	struct image test = rotate_angle(&origin, angle_r);
+	struct bmp_header angle_header = rotate_header(header, &test);
+	FILE *shit = fopen("./res/angle.bmp", "wb");
+	load_image(test, &angle_header, shit);
 
 	struct image rotated = rotate_image(origin);
-	struct bmp_header rotated_header = rotate_header(header);
+	struct bmp_header rotated_header = rotate_header(header,&rotated);
 
 	FILE *new_img = fopen("./res/result.bmp", "wb");
 
