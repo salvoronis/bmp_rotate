@@ -1,7 +1,6 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 #include <stdint.h>
-#define PI 3.14151592654
 struct __attribute__((packed)) pixel {
 	uint8_t b, g, r;
 };

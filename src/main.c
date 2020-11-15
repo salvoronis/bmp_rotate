@@ -2,10 +2,48 @@
 #include <stdlib.h>
 #include <math.h>
 #include "bmp.h"
-#include "rotation.h"
+#include "image.h"
+#include <dlfcn.h>
+#include <getopt.h>
+#include <string.h>
+
+char* picture;
+char* transform;
+char* output;
+char* param;
 
 int main(int argc, char * argv[]){
-	FILE *image = fopen(argv[1], "rb");
+	const char* shortopts = "t:p:o:a:";
+	const struct option longopts[] = {
+		{"transform", required_argument, NULL, 't'},
+		{"picture", required_argument, NULL, 'p'},
+		{"output", required_argument, NULL, 'o'},
+		{"arg", required_argument, NULL, 'a'}
+	};
+	int rez;
+	int longind;
+	while ((rez = getopt_long(argc, argv, shortopts, longopts, &longind)) != -1){
+	switch (rez) {
+		case 't':
+			if (optarg != NULL) {
+				transform = optarg;
+			}
+		case 'p':
+			if (optarg != NULL) {
+				picture = optarg;
+			}
+		case 'o':
+			if (optarg != NULL) {
+				output = optarg;
+			}
+		case 'a':
+			if (optarg != NULL) {
+				param = optarg;
+			}
+	}
+	}
+
+	FILE *image = fopen(picture, "rb");
 	struct bmp_header *header = malloc(sizeof(struct bmp_header));
 	if (read_header(image, header) != OK){
 		exit(1);
@@ -16,20 +54,29 @@ int main(int argc, char * argv[]){
 	struct image origin = parse_image(image, header->biWidth, header->biHeight);
 	fclose(image);
 	
+	struct image (*func)(struct image *origin, void* param);
+	void *handler;
+	char *error;
 
-	double angle_r = 10.0*PI/180;
-	struct image test = rotate_angle(&origin, angle_r);
+	char *lib = malloc((strlen(transform)+12)*sizeof(char));
+	sprintf(lib, "%s%s%s", "./lib/lib",transform,".so");
+	printf("%s\n",lib);
+
+	handler = dlopen(lib, RTLD_LAZY);
+	if (!handler) {
+		fputs(dlerror(), stderr);
+		exit(1);
+	}
+	func = dlsym(handler, transform);
+	if ((error = dlerror()) != NULL) {
+		fprintf(stderr, "%s\n", error);
+		exit(1);
+	}
+
+	struct image test = func(&origin, param);
 	struct bmp_header angle_header = rotate_header(header, &test);
-	FILE *shit = fopen("./res/angle.bmp", "wb");
-	load_image(test, &angle_header, shit);
-
-	struct image rotated = rotate_image(origin);
-	struct bmp_header rotated_header = rotate_header(header,&rotated);
-
-	FILE *new_img = fopen("./res/result.bmp", "wb");
-
-	load_image(rotated, &rotated_header, new_img);
-	fclose(new_img);
+	FILE *testF = fopen(output, "wb");
+	load_image(test, &angle_header, testF);
 
 	return 0;
 }
