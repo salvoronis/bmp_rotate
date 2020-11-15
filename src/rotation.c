@@ -1,19 +1,18 @@
 #include <stdint.h>
 #include <math.h>
 #include "image.h"
-#include "rotation.h"
 #include <getopt.h>
-
-#include <stdio.h>
 #include <stdlib.h>
 
 #define PI 3.14151592654
 
+static struct image rotate_angle(struct image * img, double angle);
+static uint32_t rotated_height(struct image * origin, double angle);
+static uint32_t rotated_width(struct image * origin, double angle);
+
 struct image rotation(struct image *origin, char* _angle){
 	char *rest;
 	double angle = strtod(_angle, &rest)*PI/180;
-	
-	printf("%f\n",angle);
 	
 	return rotate_angle(origin, angle);
 }

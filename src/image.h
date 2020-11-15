@@ -15,6 +15,5 @@ enum Error{
 	TYPE_ERR,
 	BITCOUNT_ERR
 };
-struct image rotate_image(struct image image);
 struct image creat_image(uint32_t width, uint32_t height);
 #endif

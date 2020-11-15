@@ -68,8 +68,8 @@ void disasseembly_arg(int argc, char * argv[]){
 		{"output", required_argument, NULL, 'o'},
 		{"arg", required_argument, NULL, 'a'}
 	};
-	int rez;
-	int longind;
+	int32_t rez;
+	int32_t longind;
 	while ((rez = getopt_long(argc, argv, shortopts, longopts, &longind)) != -1){
 	switch (rez) {
 		case 't':

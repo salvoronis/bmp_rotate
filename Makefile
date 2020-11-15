@@ -8,7 +8,7 @@ LFOLD= -L./lib/
 all: main.o bmp.o librotation.so
 	$(CC) -o $(OUTPUT) $(OBJ)main.o $(OBJ)bmp.o $(LFOLD) $(LIBS) -lrotation -Wl,-rpath,./lib
 
-plugin: main.o bmp.o librotation.so
+plugin: main.o bmp.o librotation.so libstraight.so
 	$(CC) -rdynamic -o $(OUTPUT) $(OBJ)main.o $(OBJ)bmp.o $(LIBS) -ldl
 
 main.o: src/main.c
@@ -22,6 +22,12 @@ librotation.so: rotation.o
 
 rotation.o: src/rotation.c
 	$(CC) -o $(OBJ)rotation.o -c $(SRC)rotation.c $(LIBS)
+
+libstraight.so: straight.o
+	$(CC) -shared -o lib/libstraight.so obj/straight.o
+
+straight.o: src/straight.c
+	$(CC) -o $(OBJ)straight.o -c $(SRC)straight.c
 
 clean:
 	rm obj/* build/*
