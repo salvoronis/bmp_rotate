@@ -43,8 +43,8 @@ struct image rotate_angle(struct image * origin, double angle){
 
 	for (int32_t x = 0-hwd; x < new_img.width-hwd; x++) {
 		for (int32_t y = 0-hhd; y < new_img.height-hhd; y++) {
-			int32_t X = round(x*_cos + y*_sin + hwd);
-			int32_t Y = round(y*_cos - x*_sin + hhd);
+			int32_t X = round(x*_cos + y*_sin + hws);
+			int32_t Y = round(y*_cos - x*_sin + hhs);
 
 			//printf("%d %d %d %d",X,Y,x,y);
 
