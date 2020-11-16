@@ -54,9 +54,9 @@ void workspace(struct bmp_header *header, struct image origin){
 	}
 
 	struct image test = func(&origin, param);
-	struct bmp_header angle_header = rotate_header(header, &test);
+	struct bmp_header head = new_header(test);
 	FILE *testF = fopen(output, "wb");
-	load_image(test, &angle_header, testF);
+	load_image(test, &head, testF);
 
 }
 

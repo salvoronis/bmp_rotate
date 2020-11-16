@@ -2,6 +2,7 @@
 #include <math.h>
 #include "image.h"
 #include <getopt.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #define PI 3.14151592654
@@ -28,8 +29,9 @@ uint32_t rotated_width(struct image *origin, double angle){
 struct image rotate_angle(struct image * origin, double angle){
 	uint32_t size = rotated_width(origin, angle);
 	uint32_t size1 = rotated_height(origin, angle);
-	size = size > size1 ? size : size1;
-	struct image new_img = creat_image(size,size);
+	//size = size > size1 ? size : size1;
+	//struct image new_img = creat_image(size,size);
+	struct image new_img = creat_image(size1, size);
 	
 	const float _cos = cos(angle);
 	const float _sin = sin(angle);
@@ -38,19 +40,19 @@ struct image rotate_angle(struct image * origin, double angle){
 	const double hhd = (double) new_img.height/2;
 	const double hws = (double) origin->width/2;
 	const double hhs = (double) origin->height/2;
-	const double r = sqrt(hws*hws + hhs*hhs);
-	const double b = atan2(1. * hhs, hws);
-	const double cos_b = cos(b);
-	const double sin_b = sin(b);
 
-	for (int32_t i = 0-hwd; i < new_img.width-hwd; i++) {
-		for (int32_t j = 0-hhd; j < new_img.height-hhd; j++) {
-			int32_t I = round(i*_cos - j*_sin + r*cos_b);
-			int32_t J = round(i*_sin + j*_cos + r*sin_b);
+	for (int32_t x = 0-hwd; x < new_img.width-hwd; x++) {
+		for (int32_t y = 0-hhd; y < new_img.height-hhd; y++) {
+			int32_t X = round(x*_cos + y*_sin + hwd);
+			int32_t Y = round(y*_cos - x*_sin + hhd);
 
-			if (I < 2*hws && I >= 0 && J < 2*hhs && J >= 0) {
-				*(new_img.pixels + ((i+(int32_t)hwd)*new_img.width) + j + (int32_t)hhd) = *(origin->pixels + (J * origin->width)+I);
+			//printf("%d %d %d %d",X,Y,x,y);
+
+			if (Y <= origin->height && Y >= 0 && X <= origin->width && X >= 0) {
+				*(new_img.pixels + ((y+(int32_t)hhd)*new_img.width) + x + (int32_t)hwd) = *(origin->pixels + (Y * origin->width)+X);
+				//printf(" <--");
 			}
+			//puts("");
 		}
 	}
 	return new_img;

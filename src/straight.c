@@ -1,6 +1,8 @@
 #include "image.h"
 #include <stdint.h>
 
+static struct image rotate_image(struct image origin);
+
 struct image straight(struct image * origin, char* nil){
 	return rotate_image(*origin);
 }
