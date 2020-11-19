@@ -29,8 +29,6 @@ uint32_t rotated_width(struct image *origin, double angle){
 struct image rotate_angle(struct image * origin, double angle){
 	uint32_t size = rotated_width(origin, angle);
 	uint32_t size1 = rotated_height(origin, angle);
-	//size = size > size1 ? size : size1;
-	//struct image new_img = creat_image(size,size);
 	struct image new_img = creat_image(size1, size);
 	
 	const float _cos = cos(angle);
@@ -46,13 +44,9 @@ struct image rotate_angle(struct image * origin, double angle){
 			int32_t X = round(x*_cos + y*_sin + hws);
 			int32_t Y = round(y*_cos - x*_sin + hhs);
 
-			//printf("%d %d %d %d",X,Y,x,y);
-
 			if (Y <= origin->height && Y >= 0 && X <= origin->width && X >= 0) {
 				*(new_img.pixels + ((y+(int32_t)hhd)*new_img.width) + x + (int32_t)hwd) = *(origin->pixels + (Y * origin->width)+X);
-				//printf(" <--");
 			}
-			//puts("");
 		}
 	}
 	return new_img;

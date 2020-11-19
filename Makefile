@@ -5,10 +5,7 @@ OBJ = obj/
 LIBS = -lm
 LFOLD= -L./lib/
 
-all: main.o bmp.o librotation.so
-	$(CC) -o $(OUTPUT) $(OBJ)main.o $(OBJ)bmp.o $(LFOLD) $(LIBS) -lrotation -Wl,-rpath,./lib
-
-plugin: main.o bmp.o librotation.so libstraight.so
+all: main.o bmp.o librotation.so libstraight.so
 	$(CC) -rdynamic -o $(OUTPUT) $(OBJ)main.o $(OBJ)bmp.o $(LIBS) -ldl
 
 main.o: src/main.c
@@ -32,5 +29,8 @@ straight.o: src/straight.c
 clean:
 	rm obj/* build/*
 
-example:
-	build/main res/anime.bmp  -t rotation -p res/anime.bmp -o res/ress.bmp -a 35
+rotation: all
+	build/main -t rotation -p res/anime.bmp -o res/ress.bmp -a 35
+
+straight: all
+	build/main -t straight -p res/anime.bmp -o res/result.bmp
