@@ -34,3 +34,6 @@ rotation: all
 
 straight: all
 	build/main -t straight -p res/anime.bmp -o res/result.bmp
+
+proj_struct:
+	mkdir build lib obj res

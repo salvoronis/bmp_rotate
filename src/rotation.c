@@ -19,11 +19,11 @@ struct image rotation(struct image *origin, char* _angle){
 }
 
 uint32_t rotated_height(struct image *origin, double angle){
-	return round(cos(angle)*origin->width+sin(angle)*origin->height);
+	return round(fabs(cos(angle))*origin->width+fabs(sin(angle))*origin->height);
 }
 
 uint32_t rotated_width(struct image *origin, double angle){
-	return round(sin(angle)*origin->width+cos(angle)*origin->height);
+	return round(fabs(sin(angle))*origin->width+fabs(cos(angle))*origin->height);
 }
 
 struct image rotate_angle(struct image * origin, double angle){
