@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <math.h>
-#include "image.h"
+#include "../image.h"
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,11 +1,12 @@
 CC = gcc
 OUTPUT = build/main
 SRC = src/
+PLUG = plugins/
 OBJ = obj/
 LIBS = -lm
 LFOLD= -L./lib/
 
-all: main.o bmp.o librotation.so libstraight.so
+all: main.o bmp.o librotation.so libstraight.so sepia_c.so sepia_asm.so
 	$(CC) -rdynamic -o $(OUTPUT) $(OBJ)main.o $(OBJ)bmp.o $(LIBS) -ldl
 
 main.o: src/main.c
@@ -17,14 +18,29 @@ bmp.o: src/bmp.c
 librotation.so: rotation.o
 	$(CC) -shared -o lib/librotation.so obj/rotation.o
 
-rotation.o: src/rotation.c
-	$(CC) -o $(OBJ)rotation.o -c $(SRC)rotation.c $(LIBS)
+rotation.o: src/plugins/rotation.c
+	$(CC) -o $(OBJ)rotation.o -c $(SRC)$(PLUG)rotation.c $(LIBS)
 
 libstraight.so: straight.o
 	$(CC) -shared -o lib/libstraight.so obj/straight.o
 
-straight.o: src/straight.c
-	$(CC) -o $(OBJ)straight.o -c $(SRC)straight.c
+straight.o: src/plugins/straight.c
+	$(CC) -o $(OBJ)straight.o -c $(SRC)$(PLUG)straight.c
+
+sepia_c.so: sepia_c.o
+	$(CC) -shared -o lib/libsepia_c.so obj/sepia_c.o
+
+sepia_c.o: src/plugins/sepia.c
+	$(CC) -o $(OBJ)sepia_c.o -c $(SRC)$(PLUG)sepia.c
+
+sepia_asm.so: sepia_asm_handler.o sepia_asm.o
+	$(CC) -shared -o lib/libsepia_asm.so $(OBJ)sepia_asm.o $(OBJ)sepia_asm_handler.o
+
+sepia_asm_handler.o: src/plugins/sepia_asm_handler.c
+	$(CC) -o $(OBJ)sepia_asm_handler.o -c $(SRC)$(PLUG)sepia_asm_handler.c
+
+sepia_asm.o: src/plugins/sepia_asm.asm
+	nasm -f elf64 $(SRC)$(PLUG)sepia_asm.asm -o $(OBJ)/sepia_asm.o
 
 clean:
 	rm obj/* build/*

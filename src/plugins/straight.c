@@ -1,4 +1,4 @@
-#include "image.h"
+#include "../image.h"
 #include <stdint.h>
 
 static struct image rotate_image(struct image origin);
