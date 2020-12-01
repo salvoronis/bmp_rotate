@@ -34,13 +34,13 @@ sepia_c.o: src/plugins/sepia.c
 	$(CC) -o $(OBJ)sepia_c.o -c $(SRC)$(PLUG)sepia.c
 
 sepia_asm.so: sepia_asm_handler.o sepia_asm.o
-	$(CC) -shared -o lib/libsepia_asm.so $(OBJ)sepia_asm.o $(OBJ)sepia_asm_handler.o
+	$(CC) -shared -fPIC -o lib/libsepia_asm.so $(OBJ)sepia_asm.o $(OBJ)sepia_asm_handler.o
 
 sepia_asm_handler.o: src/plugins/sepia_asm_handler.c
-	$(CC) -o $(OBJ)sepia_asm_handler.o -c $(SRC)$(PLUG)sepia_asm_handler.c
+	$(CC) -o $(OBJ)sepia_asm_handler.o -c -fPIC $(SRC)$(PLUG)sepia_asm_handler.c
 
 sepia_asm.o: src/plugins/sepia_asm.asm
-	nasm -f elf64 $(SRC)$(PLUG)sepia_asm.asm -o $(OBJ)/sepia_asm.o
+	nasm -f elf64 $(SRC)$(PLUG)sepia_asm.asm -o $(OBJ)sepia_asm.o
 
 clean:
 	rm obj/* build/*
