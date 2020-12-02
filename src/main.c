@@ -6,6 +6,8 @@
 #include <dlfcn.h>
 #include <getopt.h>
 #include <string.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 char* picture;
 char* transform;
@@ -38,6 +40,9 @@ void workspace(struct bmp_header *header, struct image origin){
 	struct image (*func)(struct image *origin, void* param);
 	void *handler;
 	char *error;
+	struct rusage r;
+	struct timeval start;
+	struct timeval end;
 
 	char *lib = malloc((strlen(transform)+12)*sizeof(char));
 	sprintf(lib, "%s%s%s", "./lib/lib",transform,".so");
@@ -47,13 +52,22 @@ void workspace(struct bmp_header *header, struct image origin){
 		fputs(dlerror(), stderr);
 		exit(1);
 	}
+
 	func = dlsym(handler, transform);
 	if ((error = dlerror()) != NULL) {
 		fprintf(stderr, "%s\n", error);
 		exit(1);
 	}
 
+	getrusage(RUSAGE_SELF, &r);
+	start = r.ru_utime;
 	struct image test = func(&origin, param);
+	getrusage(RUSAGE_SELF, &r);
+	end = r.ru_utime;
+
+	long timer = ((end.tv_sec - start.tv_sec) * 1000000L) + end.tv_usec - start.tv_usec;
+	printf("Time -> %ld\n", timer);
+
 	struct bmp_header head = new_header(test);
 	FILE *testF = fopen(output, "wb");
 	load_image(test, &head, testF);
