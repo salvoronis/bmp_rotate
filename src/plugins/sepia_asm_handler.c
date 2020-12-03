@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include "../image.h"
 
-void sepia_sse(const float *, const float*, const float*, const float*);
+//void sepia_sse(const float *, const float*, const float*, const float*);
+void sepia_sse(struct pixel *, uint32_t);
 
 float const byte_to_float[] = {
 	0.0f,	1.0f,	2.0f,	3.0f,	4.0f,	5.0f,	6.0f,	7.0f,
@@ -44,26 +45,16 @@ static uint8_t sat(int a) {
 }
 
 void sepia_asm_slave(struct pixel * pixel){
-	static float r[4], g[4], b[4], res[4];
-	
-	for (uint8_t i = 0; i < 4; i++){
-		r[i] = byte_to_float[(pixel)->r];
-		g[i] = byte_to_float[(pixel)->g];
-		b[i] = byte_to_float[(pixel)->b];
-	}
 
-	sepia_sse(r,g,b,res);
+	sepia_sse(pixel,10);
 
-	(pixel)->r = sat((int)res[0]);
-	(pixel)->g = sat((int)res[1]);
-	(pixel)->b = sat((int)res[2]);
 }
 
 struct image sepia_asm(struct image * img, char * params){
-	const uint32_t chunks = (img->width * img->height);
-	for (uint32_t i = 0; i < chunks; i++){
-		sepia_asm_slave(img->pixels + i);
-	}
+	//const uint32_t chunks = (img->width * img->height);
+	//for (uint32_t i = 0; i < chunks; i++){
+		sepia_asm_slave(img->pixels);
+	//}
 
 	return *img;
 }

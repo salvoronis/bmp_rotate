@@ -10,32 +10,67 @@
 
 section .rodata
 
-c_r: dd c11, c21, c31, c11;, c21, c31, c11, c21, c31, c11, c21, c31
-c_g: dd c12, c22, c32, c12;, c22, c32, c12, c22, c32, c12, c22, c32
-c_b: dd c13, c23, c33, c13;, c23, c33, c13, c23, c33, c13, c23, c33
+first: dd 	c11, c21, c31, c11,	c22, c32, c12, c22,	c33, c13, c23, c33
+second: dd 	c12, c22, c32, c12,	c23, c33, c13, c23,	c31, c11, c21, c31
+third: dd 	c13, c23, c33, c13,	c21, c31, c11, c21,	c32, c12, c22, c32
+
+masks: dd 0x1, 0x5, 0x15
 
 global sepia_sse
 
 section .text
-;rdi = r
-;rsi = g
-;rdx = b
-;rsx = res
+;rdi = pixels
+;rsi = count
 sepia_sse:
-	lea r9, [rel c_r]
-	lea r10, [rel c_g]
-	lea r11, [rel c_b]
+	mov rsi, 15
 
-	movdqa xmm0, [rdi] ;r1 r2 r3 r4
-	movdqa xmm1, [rsi] ;g1 g2 g3 g4
-	movdqa xmm2, [rdx] ;b1 b2 b3 b4
+	.base :
+	sub rsi, 1
+	test rsi, rsi
+	je .end
+	lea r9, [rel masks] ; mask pointer
+	xor r10, r10 ;matrix pointer
+	xor r11, r11 ;times
+	;mov rax, 10
 
-	mulps xmm0, [r9] ; mul red
-	mulps xmm1, [r10] ; mul green
-	mulps xmm2, [r11] ; mul blue
+	.loop:
+		lea r8, [rel first]
+		add r10, r8
+		movdqa xmm0, [r10]
+	
+		lea r8, [rel second]
+		add r10, r8
+		movdqa xmm1, [r10]
 
-	addps xmm0, xmm1
-	addps xmm0, xmm2
-	movdqa [rcx], xmm0
+		lea r8, [rel third]
+		add r10, r8
+		movdqa xmm2, [r10]
 
-	ret
+		cvtdq2ps xmm3, [rdi] ;r1 g1 b1 r2
+		cvtdq2ps xmm4, [rdi + 1] ;g1 b1 r2 g2
+		cvtdq2ps xmm5, [rdi + 2] ;b1 r2 g2 b2
+
+		;add r9, [rel masks]
+		shufps xmm3, xmm3, 0x1;[r9] ;r1 r1 r1 r2
+		shufps xmm4, xmm4, 0x1;[r9] ;g1 g1 g1 g2
+		shufps xmm5, xmm5, 0x1;[r9] ;b1 b1 b1 b2
+
+		mulps xmm3, xmm0 ; mul red
+		mulps xmm4, xmm1 ; mul green
+		mulps xmm5, xmm2 ; mul blue
+
+		addps xmm3, xmm4
+		addps xmm3, xmm5
+		cvtps2dq xmm3, xmm3
+		movdqa [rdi], xmm3
+
+		cmp r11, 2
+		je .base
+
+	inc r11
+	add r10, 16
+	add r9, 4
+	jmp .loop
+
+	.end:
+		ret
