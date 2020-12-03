@@ -35,20 +35,22 @@ sepia_sse:
 
 	.loop:
 		lea r8, [rel first]
-		add r10, r8
-		movdqa xmm0, [r10]
+		add r8, r10
+		movdqa xmm0, [r8]
 	
 		lea r8, [rel second]
-		add r10, r8
-		movdqa xmm1, [r10]
+		add r8, r10
+		movdqa xmm1, [r8]
 
 		lea r8, [rel third]
-		add r10, r8
-		movdqa xmm2, [r10]
+		add r8, r10
+		movdqa xmm2, [r8]
 
 		cvtdq2ps xmm3, [rdi] ;r1 g1 b1 r2
-		cvtdq2ps xmm4, [rdi + 1] ;g1 b1 r2 g2
-		cvtdq2ps xmm5, [rdi + 2] ;b1 r2 g2 b2
+		add rdi, 2
+		cvtdq2ps xmm4, [rdi] ;g1 b1 r2 g2
+		add rdi, 2
+		cvtdq2ps xmm5, [rdi] ;b1 r2 g2 b2
 
 		;add r9, [rel masks]
 		shufps xmm3, xmm3, 0x1;[r9] ;r1 r1 r1 r2
@@ -66,7 +68,8 @@ sepia_sse:
 
 		cmp r11, 2
 		je .base
-
+	
+	add rdi, 4
 	inc r11
 	add r10, 16
 	add r9, 4
