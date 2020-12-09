@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include "../image.h"
 
-//void sepia_sse(const float *, const float*, const float*, const float*);
-void sepia_sse(struct pixel *, uint32_t);
+void sepia_sse(struct pixel * img, uint32_t size);
 
 float const byte_to_float[] = {
 	0.0f,	1.0f,	2.0f,	3.0f,	4.0f,	5.0f,	6.0f,	7.0f,
@@ -44,17 +43,8 @@ static uint8_t sat(int a) {
 	return a > 255 ? 255 : a;
 }
 
-void sepia_asm_slave(struct pixel * pixel){
-
-	sepia_sse(pixel,10);
-
-}
-
 struct image sepia_asm(struct image * img, char * params){
-	//const uint32_t chunks = (img->width * img->height);
-	//for (uint32_t i = 0; i < chunks; i++){
-		sepia_asm_slave(img->pixels);
-	//}
+	sepia_sse(img->pixels, img->width * img->height);
 
 	return *img;
 }

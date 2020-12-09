@@ -53,3 +53,9 @@ straight: all
 
 proj_struct:
 	mkdir build lib obj res
+
+test:
+	nasm -f elf64 -g src/plugins/sepia_asm.asm -o obj/sepia_asm.o
+	gcc -shared -fPIC -g -o lib/libsepia_asm.so obj/sepia_asm.o obj/sepia_asm_handler.o
+	gcc -rdynamic -g -o build/main obj/main.o obj/bmp.o -lm -ldl
+	gdb build/main
