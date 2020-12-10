@@ -6,7 +6,7 @@ OBJ = obj/
 LIBS = -lm
 LFOLD= -L./lib/
 
-all: main.o bmp.o librotation.so libstraight.so sepia_c.so sepia_asm.so
+all: proj_struct main.o bmp.o librotation.so libstraight.so sepia_c.so sepia_asm.so
 	$(CC) -rdynamic -o $(OUTPUT) $(OBJ)main.o $(OBJ)bmp.o $(LIBS) -ldl
 
 main.o: src/main.c
@@ -43,7 +43,7 @@ sepia_asm.o: src/plugins/sepia_asm.asm
 	nasm -f elf64 $(SRC)$(PLUG)sepia_asm.asm -o $(OBJ)sepia_asm.o
 
 clean:
-	rm obj/* build/*
+	rm obj/* build/* || echo "already cleaned"
 
 rotation: all
 	build/main -t rotation -p res/anime.bmp -o res/ress.bmp -a 35
@@ -52,7 +52,7 @@ straight: all
 	build/main -t straight -p res/anime.bmp -o res/result.bmp
 
 proj_struct:
-	mkdir build lib obj res
+	mkdir build lib obj res || echo "already exists"
 
 test:
 	nasm -f elf64 -g src/plugins/sepia_asm.asm -o obj/sepia_asm.o
