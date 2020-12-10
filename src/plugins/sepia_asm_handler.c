@@ -5,7 +5,7 @@
 void sepia_sse(struct pixel * img, uint32_t size);
 
 struct image sepia_asm(struct image * img, char * params){
-	sepia_sse(img->pixels, (img->width * img->height/4)/2);
+	sepia_sse(img->pixels, (img->width * img->height)/8);
 
 	return *img;
 }
