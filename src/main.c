@@ -90,18 +90,22 @@ void disasseembly_arg(int argc, char * argv[]){
 			if (optarg != NULL) {
 				transform = optarg;
 			}
+			break;
 		case 'p':
 			if (optarg != NULL) {
 				picture = optarg;
 			}
+			break;
 		case 'o':
 			if (optarg != NULL) {
 				output = optarg;
 			}
+			break;
 		case 'a':
 			if (optarg != NULL) {
 				param = optarg;
 			}
+			break;
 	}
 	}
 
