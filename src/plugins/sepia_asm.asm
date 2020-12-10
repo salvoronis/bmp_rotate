@@ -15,12 +15,16 @@ section .rodata
 
 align 16
 
-first: dd 	c11, c21, c31, c11,	c22, c32, c12, c22,	c33, c13, c23, c33
-second: dd 	c12, c22, c32, c12,	c23, c33, c13, c23,	c31, c11, c21, c31
-third: dd 	c13, c23, c33, c13,	c21, c31, c11, c21,	c32, c12, c22, c32
+;first: dd 	c11, c21, c31, c11,	c22, c32, c12, c22,	c33, c13, c23, c33
+;second: dd 	c12, c22, c32, c12,	c23, c33, c13, c23,	c31, c11, c21, c31
+;third: dd 	c13, c23, c33, c13,	c21, c31, c11, c21,	c32, c12, c22, c32
 
-;first: dd 	c11, c21, c31, c11,	c21, c31, c11, c21,	c31, c11, c21, c31
-;second: dd 	c12, c22, c32, c12,	c22, c32, c12, c22,	c32, c12, c22, c32
+first: dd 	c11, c21, c31, c11,	c21, c31, c11, c21,	c31, c11, c21, c31
+second: dd 	c12, c22, c32, c12,	c22, c32, c12, c22,	c32, c12, c22, c32
+third: dd 	c13, c23, c33, c13,	c23, c33, c13, c23,	c33, c13, c23, c33
+
+;first: dd 	c11, c11, c11, c11,	c11, c11, c11, c11,	c11, c11, c11, c11
+;second: dd 	c12, c22, c32, c12,	c22, c32, c12, c22,	c11, c11, c11, c11
 ;third: dd 	c13, c23, c33, c13,	c23, c33, c13, c23,	c33, c13, c23, c33
 
 section .data
@@ -40,6 +44,7 @@ section .text
 ;rdi = pixels
 ;rsi = size/4
 sepia_sse:
+	;add rdi, 10
 	.start:
 		lea r10, [rel chunk] ; хранит адресс буфера
 		mov rcx, 0 ; размер офсета буфера в байтах (60)
@@ -64,28 +69,27 @@ sepia_sse:
 	xor r9, r9
 	push rsi
 	lea rsi, [rel chunk] ; загружаем в rsi указатель на буфер исходник
-	mov rdx, 16 ; сколько нужно переписать байтов
+	mov rdx, 16 ; сколько нужно переписать байтов (4 float)
 	.handler:
 		push rdi
 
-		;mov rdx, 16
 		lea rdi, [rel fst_row]
-		call memcpy wrt ..plt
+		call memcpy wrt ..plt ; загружаем в fst_row r1 g1 b1 r2
 
 		lea rdi, [rel scnd_row]
 		add rsi, 4
-		call memcpy wrt ..plt
+		call memcpy wrt ..plt ; загружаем в scnd_row g1 b1 r2 g2
 
-		lea rdi, [rel thrd_row]
+		lea rdi, [rel thrd_row] ; thrd_row -> b1 r2 g2 b2
 		add rsi, 4
 		call memcpy wrt ..plt
 
 		pop rdi
 
-		call sepia_creator
-		add rdi, 8
-		add r9, 16
-		sub rsi, 4
+		call sepia_creator ; сами операции по изменению цвета
+		add rdi, 8 ; смещение исходных цветов на 4 цвета
+		add r9, 16 ; смещение указателя масок и коэффициентов
+		add rsi, 8
 		cmp r9, 48
 		jne .handler
 
@@ -95,14 +99,13 @@ sepia_sse:
 	cmp rsi, 0
 	je .end
 
-	;add rdi, 48
 	jmp .start
 
 	.end:
 		ret
 
 ;rdi - pixels point
-;r9 - mask pointer
+;r9 - mask pointer & offset
 sepia_creator:
 	xor r11, r11 ;times
 
@@ -119,11 +122,11 @@ sepia_creator:
 	movdqa xmm2, [rel third]
 
 	lea r11, [rel fst_row]
-	movdqa xmm3, [r11] ; загрузка самих пикселей r1 g1 b1 b1
+	movdqa xmm3, [r11] ; загрузка самих пикселей r1 g1 b1 r1
 	lea r11, [rel scnd_row]
-	movdqa xmm4, [r11]
-	lea r11, [rel thrd_row]
-	cvtdq2ps xmm5, [r11] ;b1 r2 g2 b2
+	movdqa xmm4, [r11] ; загрузка g1 b1 r2 g2
+	lea r11, [rel thrd_row] ; b1 r2 g2 b2
+	movdqa xmm5, [r11]
 
 	cmp r9, 0
 	je .first_stage
@@ -147,40 +150,45 @@ sepia_creator:
 		shufps xmm4, xmm4, 0x15 ;r3 r4 r4 r4
 		shufps xmm5, xmm5, 0x15 ;g3 g4 g4 g4
 	.conclusion:
-	mulps xmm3, xmm0 ; mul red
-	mulps xmm4, xmm1 ; mul green
-	mulps xmm5, xmm2 ; mul blue
+	mulps xmm3, xmm0 ; mul with first coeficients
+	mulps xmm4, xmm1 ; mul second
+	mulps xmm5, xmm2 ; mul third
 
 	addps xmm3, xmm4
-	addps xmm3, xmm5
-	cvtps2dq xmm3, xmm3
-	;movdqa [rdi], xmm3
-	lea r12, [rel fst_row]
+	addps xmm3, xmm5 ; xmm3 -> float R1 G1 B1 R2
+	cvtps2dq xmm3, xmm3 ; xmm -> uint32_t R1 G1 B1 R2
+
+	lea r12, [rel fst_row] ; буфер для хранения uint32_t R1 G1 B1 R2
 	movdqa [r12], xmm3
 
 	xor rax, rax
-	mov eax, [r12]
+
+	mov eax, [r12] ; eax -> uint32_t R1
 	call sat
-	mov [rdi], al
+	.fst:
+	mov [rdi], al ; R1 -> pixels
 
 	mov eax, [r12+4]
 	call sat
+	.scnd:
 	mov [rdi+2], al
 
 	mov eax, [r12+8]
 	call sat
+	.thrd:
 	mov [rdi+4], al
 
 	mov eax, [r12+12]
 	call sat
+	.fth:
 	mov [rdi+6], al
-	.shitass:
 	
 	ret
 
 sat:
 	cmp eax, 256
 	jae .less
+	.ok:
 	ret
 	.less:
 		mov eax, 255
