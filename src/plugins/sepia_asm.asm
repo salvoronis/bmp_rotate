@@ -130,41 +130,31 @@ sepia_creator:
 
 	addps xmm3, xmm4
 	addps xmm3, xmm5 ; xmm3 -> float B1 G1 R1 B2
+	;packuswb xmm3, xmm3
 	cvtps2dq xmm3, xmm3 ; xmm -> uint32_t B1 G1 R1 B2
-.check:
+
+	packusdw xmm3, xmm3
+	packuswb xmm3, xmm3
+
 	lea r12, [rel buffer] ; buffer which contains uint32_t B1 G1 R1 B2
 	movdqa [r12], xmm3
 
 	xor rax, rax
 
 	mov eax, [r12] ; eax -> uint32_t B1
-	call sat
 	.fst:
 	mov [rdi], al ; B1 -> pixels
 
-	mov eax, [r12+4]
-	call sat
+	mov eax, [r12+1]
 	.scnd:
 	mov [rdi+1], al
 
-	mov eax, [r12+8]
-	call sat
+	mov eax, [r12+2]
 	.thrd:
 	mov [rdi+2], al
 
-	mov eax, [r12+12]
-	call sat
+	mov eax, [r12+3]
 	.fth:
 	mov [rdi+3], al
 	
 	ret
-
-;eax - color
-sat:
-	cmp eax, 256
-	jae .less
-	.ok:
-	ret
-	.less:
-		mov eax, 255
-		ret
