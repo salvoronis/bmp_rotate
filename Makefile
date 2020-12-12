@@ -6,7 +6,7 @@ OBJ = obj/
 LIBS = -lm
 LFOLD= -L./lib/
 
-all: proj_struct main.o bmp.o librotation.so libstraight.so sepia_c.so sepia_asm.so
+all: proj_struct main.o bmp.o librotation.so libstraight.so libsepia_c.so libsepia_asm.so
 	$(CC) -rdynamic -o $(OUTPUT) $(OBJ)main.o $(OBJ)bmp.o $(LIBS) -ldl
 
 main.o: src/main.c
@@ -27,13 +27,13 @@ libstraight.so: straight.o
 straight.o: src/plugins/straight.c
 	$(CC) -o $(OBJ)straight.o -c $(SRC)$(PLUG)straight.c
 
-sepia_c.so: sepia_c.o
+libsepia_c.so: sepia_c.o
 	$(CC) -shared -o lib/libsepia_c.so obj/sepia_c.o
 
 sepia_c.o: src/plugins/sepia.c
 	$(CC) -o $(OBJ)sepia_c.o -c $(SRC)$(PLUG)sepia.c
 
-sepia_asm.so: sepia_asm_handler.o sepia_asm.o
+libsepia_asm.so: sepia_asm_handler.o sepia_asm.o
 	$(CC) -shared -fPIC -o lib/libsepia_asm.so $(OBJ)sepia_asm.o $(OBJ)sepia_asm_handler.o
 
 sepia_asm_handler.o: src/plugins/sepia_asm_handler.c
